@@ -1,0 +1,88 @@
+---
+title: "Report for question 5,6"
+author: "Jinjie Zhang"
+date: "October 12, 2017"
+output: pdf_document
+---
+
+##The compare_outcomes function
+In this question, we make a new function, compare_outcomes, that takes as input an iteration number. It gives the result of mean and sd of the data a. By running this function for three times with different input of iterations as 1000, 10000 and 100000 we can get following results:
+```{r}
+source("Source.R")  
+#load the Source.R file which contains all the functions we've defined
+trueA <- 5
+trueB <- 0
+trueSd <- 10
+sampleSize <- 31
+# create independent x-values 
+x =(-(sampleSize-1)/2):((sampleSize-1)/2)
+# create dependent values according to ax + b + N(0,sd)
+y=trueA * x + trueB + rnorm(n=sampleSize,mean=0,sd=trueSd)
+
+compare_outcomes<-function(trueA,trueB,trueSd,iterations)    
+{
+  adata=matrix(0,10,2)
+  for (i in 1:10)
+  {
+    #construct the random variables for the startvalue
+    ParA<-runif(1,trueA-3,trueA+3)
+    ParB<-runif(1,trueB-3,trueB+3)
+    ParSd<-runif(1,trueSd-3,trueSd+3)
+    startvalue<-c(ParA,ParB,ParSd)
+    newchain<-run_metropolis_MCMC(startvalue,iterations)
+    refinechain<-newchain[-(1:0.5*length(newchain)),]
+    adata[i,1]=mean(refinechain[,1])
+    adata[i,2]=sd(refinechain[,1])
+  }
+  return(adata)
+}
+Final1<-compare_outcomes(trueA,trueB,trueSd,1000)
+Final2<-compare_outcomes(trueA,trueB,trueSd,10000)
+Final3<-compare_outcomes(trueA,trueB,trueSd,100000)
+print(Final1)
+print(Final2)
+print(Final3)
+axis=c(1:10)
+```
+
+The number of iterations is 1000.
+```{r}
+plot(axis,Final1[,1],main="Mean of a with iterations 1000", xlab="Index",ylab="mean of a")
+abline(h = mean(Final1[,1]))
+abline(h = trueA, col="red" )
+plot(axis,Final1[,2],main="sd of a with iterations 1000", xlab="Index",ylab="sd of a")
+abline(h = mean(Final1[,2]))
+abline(h = 0, col="red" )
+```
+
+The number of iterations is 10000.
+```{r}
+plot(axis,Final2[,1],main="Mean of a with iterations 10000", xlab="Index",ylab="mean of a")
+abline(h = mean(Final2[,1]))
+abline(h = trueA, col="red" )
+plot(axis,Final2[,2],main="sd of a with iterations 10000", xlab="Index",ylab="sd of a")
+abline(h = mean(Final2[,2]))
+abline(h = 0, col="red" )
+```
+
+The number iterations is 100000.
+```{r}
+plot(axis,Final3[,1],main="Mean of a with iterations 100000", xlab="Index",ylab="mean of a")
+abline(h = mean(Final3[,1]))
+abline(h = trueA, col="red" )
+plot(axis,Final3[,2],main="sd of a with iterations 100000", xlab="Index",ylab="sd of a")
+abline(h = mean(Final3[,2]))
+abline(h = 0, col="red" )
+```
+
+###Conclusion:
+
+The true value of $a$ is $5$. For above three different numbers of iterations, we have following results:
+
+1. When the number of iterations is $1000$, the mean of approximations is $4.78$ and the standard deviation is $0.37$;
+
+2. When the number of iterations is $10,000$, the mean of approximations is $4.74$ and the standard deviation is $0.21$;
+
+3. When the number of iterations is $100,000$, the mean of approximations is $4.74$ and the standard deviation is $0.20$.
+
+Since the deviation of the predictions decreases, the accuracy of finding $a$ improves as the number of iterations increases.
